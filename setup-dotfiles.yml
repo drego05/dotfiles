@@ -1,0 +1,122 @@
+---
+# Ansible Playbook for Dotfiles Setup
+# This playbook clones and configures dotfiles on target machines
+#
+# Usage:
+#   ansible-playbook setup-dotfiles.yml
+#   ansible-playbook setup-dotfiles.yml --ask-become-pass
+#   ansible-playbook -i inventory.ini setup-dotfiles.yml
+
+- name: Setup Dotfiles on Target Machines
+  hosts: all
+  become: false
+  vars:
+    dotfiles_repo: "https://github.com/drego05/dotfiles.git"
+    dotfiles_dir: "{{ ansible_env.HOME }}/dotfiles"
+    git_user_name: "drego05"
+    git_user_email: "drego05@gmail.com"
+
+  tasks:
+    - name: Display target information
+      ansible.builtin.debug:
+        msg: "Setting up dotfiles on {{ inventory_hostname }} ({{ ansible_distribution }})"
+
+    - name: Ensure git is installed
+      become: true
+      ansible.builtin.package:
+        name: git
+        state: present
+
+    - name: Ensure curl is installed
+      become: true
+      ansible.builtin.package:
+        name: curl
+        state: present
+
+    - name: Ensure wget is installed
+      become: true
+      ansible.builtin.package:
+        name: wget
+        state: present
+
+    - name: Ensure unzip is installed
+      become: true
+      ansible.builtin.package:
+        name: unzip
+        state: present
+
+    - name: Configure git user name
+      community.general.git_config:
+        name: user.name
+        scope: global
+        value: "{{ git_user_name }}"
+
+    - name: Configure git user email
+      community.general.git_config:
+        name: user.email
+        scope: global
+        value: "{{ git_user_email }}"
+
+    - name: Check if dotfiles directory exists
+      ansible.builtin.stat:
+        path: "{{ dotfiles_dir }}"
+      register: dotfiles_stat
+
+    - name: Clone dotfiles repository
+      ansible.builtin.git:
+        repo: "{{ dotfiles_repo }}"
+        dest: "{{ dotfiles_dir }}"
+        version: main
+        update: true
+      when: not dotfiles_stat.stat.exists
+
+    - name: Update dotfiles repository if it exists
+      ansible.builtin.git:
+        repo: "{{ dotfiles_repo }}"
+        dest: "{{ dotfiles_dir }}"
+        version: main
+        update: true
+      when: dotfiles_stat.stat.exists
+
+    - name: Make bootstrap script executable
+      ansible.builtin.file:
+        path: "{{ dotfiles_dir }}/bootstrap.sh"
+        mode: '0755'
+
+    - name: Run bootstrap script
+      ansible.builtin.shell: "{{ dotfiles_dir }}/bootstrap.sh"
+      args:
+        executable: /bin/bash
+      register: bootstrap_output
+      changed_when: "'Installation Complete' in bootstrap_output.stdout"
+
+    - name: Display bootstrap output
+      ansible.builtin.debug:
+        var: bootstrap_output.stdout_lines
+
+    - name: Check if Zsh is the default shell
+      ansible.builtin.shell: "echo $SHELL"
+      register: current_shell
+      changed_when: false
+
+    - name: Display current shell
+      ansible.builtin.debug:
+        msg: "Current shell: {{ current_shell.stdout }}"
+
+    - name: Reminder about shell change
+      ansible.builtin.debug:
+        msg: |
+          ====================================
+          Dotfiles setup complete!
+
+          Next steps:
+          1. Configure terminal font to 'MesloLGS Nerd Font'
+          2. Log out and log back in (or restart terminal)
+          3. Verify Zsh is the default shell
+          4. Authenticate with GitHub CLI: gh auth login
+
+          Useful commands:
+          - tmux: Start a new tmux session
+          - v: Open Neovim
+          - ll: List files with eza
+          ====================================

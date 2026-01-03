@@ -1,0 +1,37 @@
+# Ansible Inventory Example
+# Copy this file to 'inventory.ini' and customize for your environment
+# Usage: ansible-playbook -i inventory.ini setup-dotfiles.yml
+
+# Single local machine
+[local]
+localhost ansible_connection=local
+
+# Remote machines via SSH
+[remote]
+server1 ansible_host=192.168.1.10 ansible_user=your_user
+server2 ansible_host=192.168.1.11 ansible_user=your_user
+# server3 ansible_host=example.com ansible_user=your_user ansible_port=2222
+
+# Development machines
+[dev]
+dev-vm ansible_host=192.168.1.20 ansible_user=dev_user
+
+# Production machines
+[prod]
+prod-server ansible_host=10.0.0.5 ansible_user=prod_user
+
+# All machines (combines all groups)
+[all:children]
+local
+remote
+dev
+prod
+
+# Group variables (optional)
+[all:vars]
+# Uncomment if you need to use a specific SSH key
+# ansible_ssh_private_key_file=~/.ssh/id_rsa
+
+# Uncomment if you need to use password authentication
+# ansible_ssh_pass=your_password
+# ansible_become_pass=your_sudo_password
