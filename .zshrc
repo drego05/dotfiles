@@ -133,3 +133,8 @@ for pattern_file in ~/.config/fabric/patterns/*; do
     }
     "
 done
+
+# Load custom aliases
+if [ -f ~/.zsh_aliases ]; then
+    source ~/.zsh_aliases
+fi
