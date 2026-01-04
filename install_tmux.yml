@@ -1,0 +1,21 @@
+---
+- name: Install tmux on remote hosts
+  hosts: all
+  become: true  # Elevate to sudo if necessary
+  tasks:
+    - name: Update package cache
+      ansible.builtin.apt:
+        update_cache: yes
+  
+    - name: Install tmux
+      ansible.builtin.apt:
+        name: tmux
+        state: present
+
+        
+      # For RedHat-based distros, use yum or dnf:
+      # ansible.builtin.yum:
+      #   name: tmux
+      #   state: present
+
+

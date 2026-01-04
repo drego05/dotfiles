@@ -1,0 +1,21 @@
+plugin: community.general.proxmox
+url: https://192.168.1.246:8006
+user: root@pam
+password: zhv.HRA.uvk9exw3hex
+validate_certs: false
+
+# Group by tags
+compose:
+  ansible_host: ipconfig0.ip | default(ansible_host)
+  
+keyed_groups:
+  - key: tags
+    prefix: tag
+    separator: "_"
+  - key: proxmox_type
+    prefix: type
+    
+groups:
+  lxc: proxmox_type == "lxc"
+  qemu: proxmox_type == "qemu"
+  running: status == "running"

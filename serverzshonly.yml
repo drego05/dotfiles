@@ -1,0 +1,91 @@
+- name: For Proxmox servers
+  hosts: proxmox_hosts
+  become: true
+  tasks:
+
+  # Push out zshrc configuration
+  - name: Push out zshrc configuration
+    copy:
+      src: files/.zshrc
+      dest: /home/{{ ansible_user }}/.zshrc
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: '0644'
+
+  # Ensure zsh, terminator, wget, and curl are installed
+  - name: Install zsh and other packages
+    package:
+      name:
+      - zsh
+      - terminator
+      - wget
+      - curl
+      state: present
+
+  # Change default shell to zsh
+  - name: Change default shell to zsh
+    user:
+      name: "{{ ansible_user }}"
+      shell: /bin/zsh
+
+  # Clone oh-my-zsh repository
+  - name: Clone Oh My Zsh
+    git:
+      repo: https://github.com/ohmyzsh/ohmyzsh.git
+      dest: /home/{{ ansible_user }}/.oh-my-zsh
+      update: no
+    become: false
+
+  # Clone powerlevel10k theme
+  - name: Clone powerlevel10k theme
+    git:
+      repo: https://github.com/romkatv/powerlevel10k.git
+      dest: /home/{{ ansible_user }}/.oh-my-zsh/custom/themes/powerlevel10k
+      depth: 1
+      update: yes
+    become: false
+
+  # Install zsh-autosuggestions plugin
+  - name: Install zsh-autosuggestions
+    git:
+      repo: https://github.com/zsh-users/zsh-autosuggestions.git
+      dest: /home/{{ ansible_user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+    become: false
+
+  # Install zsh-syntax-highlighting plugin
+  - name: Install zsh-syntax-highlighting
+    git:
+      repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+      dest: /home/{{ ansible_user }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+    become: false
+
+  # Ensure font directory exists
+  - name: Ensure font directory exists
+    file:
+      path: /home/{{ ansible_user }}/.local/share/fonts
+      state: directory
+      mode: '0755'
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+
+  # Download the font file
+  - name: Download the font file
+    get_url:
+      url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf"
+      dest: /home/{{ ansible_user }}/.local/share/fonts/MesloLGS NF Regular.ttf
+      mode: '0644'
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+
+  # Refresh the font cache
+  - name: Refresh the font cache
+    command: fc-cache -fv
+    args:
+      warn: false
+
+  # Verify font installation
+  - name: Verify font installation
+    shell: |
+      fc-list | grep -i "MesloLGS NF Regular"
+    register: font_check
+    failed_when: "'MesloLGS NF Regular' not in font_check.stdout"

@@ -1,0 +1,17 @@
+- name: Append DNS to all docker-compose.yml files
+  hosts: nas_hosts
+  tasks:
+    - name: Find all docker-compose.yml files
+      ansible.builtin.find:
+        paths: "/var/services/homes/drego/docker-compose-files/"
+        patterns: "docker-compose.yml"
+        recurse: true
+      register: compose_files
+
+    - name: Ensure DNS block exists correctly after environment
+      ansible.builtin.replace:
+        path: "{{ item.path }}"
+        regexp: '(environment:\n(?:\s+- .*\n)+)(?!\s+dns:)'  # Match the end of environment block, ensure no existing DNS
+        replace: '\1    dns:\n      - 192.168.1.61\n      - 192.168.1.179\n'
+      loop: "{{ compose_files.files }}"
+

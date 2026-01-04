@@ -1,0 +1,71 @@
+- name: Oh My Zsh for LXC Only
+  hosts: lxc_hosts
+  become: true
+  tasks:
+    # Ensure git is installed
+    - name: Install git
+      apt:
+        name: git
+        state: present
+      when: ansible_os_family == "Debian"
+
+   # - name: Create .zshrc file
+   #   file:
+   #     path: "/home/drego/.zshrc"
+   #     state: touch
+   #     mode: '0644'
+   #   become: no
+   #   become_user: drego
+
+
+# Ensure zsh is installed
+    - name: Install zsh and terminator
+      package:
+        name: zsh, terminator, wget, curl
+        state: present
+
+    - name: Change default shell to zsh
+      user:
+        name: "{{ ansible_user }}"
+        shell: /bin/zsh
+
+    # Clone oh-my-zsh repository if not already installed
+    - name: Clone Oh My Zsh
+      git:
+        repo: https://github.com/ohmyzsh/ohmyzsh.git
+        dest: ~/.oh-my-zsh
+        force: false
+        clone: yes
+      become: false
+      when: not ansible_os_family.startswith('Windows')
+    #Clone powerlevel10k
+    - name: Clone powerlevel10k theme
+      git:
+        repo: https://github.com/romkatv/powerlevel10k.git
+        dest: "/home/drego/.oh-my-zsh/custom/themes/powerlevel10k"
+        depth: 1
+        update: yes
+        force: false
+    
+    - name: Ensure font directory exists
+      file:
+        path: "/home/drego/.local/share/fonts"
+        state: directory
+        mode: '0755'
+
+    - name: Download the font file
+      get_url:
+        url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf"
+        dest: "/home/drego/.local/share/fonts/MesloLGS NF Regular.ttf"
+        mode: '0644'
+
+    - name: Refresh the font cache
+      command: fc-cache -fv
+      args:
+        warn: false
+
+    - name: Verify font installation
+      shell: |
+        fc-list | grep -i "MesloLGS NF Regular"
+      register: font_check
+      failed_when: "'MesloLGS NF Regular' not in font_check.stdout"

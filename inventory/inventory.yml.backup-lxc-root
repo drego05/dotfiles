@@ -1,0 +1,162 @@
+all:
+  children:
+    # LXC Containers across all Proxmox nodes
+    lxc_hosts:
+      hosts:
+        # Node 252 (proxmox1) - LXCs
+        192.168.1.152:  # pihole
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.112:  # splunk
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.219:  # pbs
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.144:  # homeassistant
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.146:  # mcp-server
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.136:  # guacamole
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        # Node 230 (pve) - LXCs
+        192.168.1.118:  # uptimekuma
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.179:  # wikijs
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.231:  # fleet-server
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.60.147:  # meal-recipes
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.107:  # terraform-test
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.239:  # obsidian-mcp
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.148:  # n8n
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.132:  # cyberchef
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.120:  # netbootxyz
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.127:  # nextcloud
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.194:  # jupyter-notebook (also ubuntu-lxc on node 246)
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.248:  # gitea
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.232:  # fabric
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        # Node 246 (zima2) - LXCs
+        192.168.1.242:  # karakeep
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.124:  # stirlingpdf
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.130:  # ittools
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+
+    # VM hosts (kept from original inventory)
+    vm_hosts:
+      hosts:
+        192.168.1.158:
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+        192.168.1.218:
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: furley123
+
+    # Proxmox host nodes
+    proxmox_hosts:
+      hosts:
+        192.168.1.252:  # proxmox1
+          ansible_user: root
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: zhv.HRA.uvk9exw3hex
+        192.168.1.230:  # pve
+          ansible_user: root
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: zhv.HRA.uvk9exw3hex
+        192.168.1.246:  # zima2
+          ansible_user: root
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_become_password: zhv.HRA.uvk9exw3hex
+
+    # NAS hosts
+    nas_hosts:
+      hosts:
+        192.168.1.111:
+          ansible_user: drego
+          ansible_ssh_private_key_file: ~/.ssh/semaphore-homelab
+          ansible_python_interpreter: /usr/bin/python3
+          ansible_port: 2244
+          ansible_become_password: MY!3MxiUrJNz@0LwU3P$FATjz2gW
+          ansible_scp_if_ssh: true

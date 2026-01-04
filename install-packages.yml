@@ -1,0 +1,14 @@
+---
+- name: Install packages on all LXCs
+  hosts: all
+  gather_facts: true
+  become: true   # escalate to root if your ansible_user isn't root
+  tasks:
+    - name: Ensure required packages are installed
+      ansible.builtin.package:
+        name:
+          - iputils-ping
+          - git
+          - curl
+        state: present
+

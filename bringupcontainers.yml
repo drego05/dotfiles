@@ -1,0 +1,20 @@
+---
+- name: Recursively start Docker Compose project
+  hosts: nas_hosts
+  become: true
+  gather_facts: false
+
+  tasks:
+  - name: Find all docker-compose.yml files
+    find:
+      paths: "/var/services/homes/drego/docker-compose-files/"
+      patterns: "docker-compose.yml"
+      recurse: yes
+    register: compose_files
+
+  - name: Run docker-compose up in each directory
+    command: docker-compose up -d
+    args:
+      chdir: "{{ item.path | dirname }}"
+    loop: "{{ compose_files.files }}"
+    when: compose_files.matched > 0

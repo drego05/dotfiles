@@ -1,0 +1,59 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: semaphore-mysql
+    restart: unless-stopped
+    command: --max-allowed-packet=64M
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_DATABASE: semaphore
+      MYSQL_USER: semaphore
+      MYSQL_PASSWORD: semaphore_password
+    volumes:
+      - semaphore-mysql:/var/lib/mysql
+    networks:
+      - semaphore
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+  semaphore:
+    image: semaphoreui/semaphore:latest
+    container_name: semaphore
+    restart: unless-stopped
+    ports:
+      - 3001:3000
+    environment:
+      SEMAPHORE_DB_DIALECT: mysql
+      SEMAPHORE_DB_HOST: mysql
+      SEMAPHORE_DB_PORT: 3306
+      SEMAPHORE_DB_USER: semaphore
+      SEMAPHORE_DB_PASS: semaphore_password
+      SEMAPHORE_DB_NAME: semaphore
+      SEMAPHORE_DB_MAX_IDLE_CONNS: 5
+      SEMAPHORE_DB_MAX_OPEN_CONNS: 10
+      SEMAPHORE_DB_CONN_MAX_LIFETIME: 3600
+      SEMAPHORE_ADMIN_PASSWORD: admin
+      SEMAPHORE_ADMIN_NAME: admin
+      SEMAPHORE_ADMIN_EMAIL: admin@localhost
+      SEMAPHORE_ADMIN: admin
+      SEMAPHORE_ACCESS_KEY_ENCRYPTION: vLUR71sQUoW9NLMLeUekaow4B5JQZGWFROkIX2WbmjM=
+      ANSIBLE_HOST_KEY_CHECKING: 'False'
+    volumes:
+      - /home/drego/ansible-project/playbooks:/ansible:ro
+      - ./ssh:/home/semaphore/.ssh:ro
+      - semaphore-data:/tmp/semaphore
+    networks:
+      - semaphore
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+networks:
+  semaphore:
+    driver: bridge
+
+volumes:
+  semaphore-mysql:
+  semaphore-data:

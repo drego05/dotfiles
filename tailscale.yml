@@ -1,0 +1,12 @@
+---
+- name: Install and configure Tailscale with SSH enabled
+  hosts: tailscale
+  become: true
+
+  vars:
+    tailscale_authkey: "tskey-auth-kft1bY6GX521CNTRL-sn4tSvqtsA2Cw2PwNJCQ62HwnJ4QtchM2"
+    tailscale_args: "--ssh"
+
+  roles:
+    - role: artis3n.tailscale
+

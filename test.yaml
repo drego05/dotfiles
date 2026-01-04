@@ -1,0 +1,9 @@
+---
+- name: Test Proxmox inventory
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Show which host we're hitting
+      debug:
+        msg: "Running on {{ inventory_hostname }} at {{ ansible_host }}"
+

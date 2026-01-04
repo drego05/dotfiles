@@ -1,0 +1,39 @@
+---
+- name: Configure Dynamic MOTD
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install dependencies (figlet, ruby, and rubygems)
+      apt:
+        name:
+          - figlet
+          - ruby
+          - ruby-dev
+        state: present
+        update_cache: yes
+
+    - name: Install lolcat via gem
+      gem:
+        name: lolcat
+        state: present
+        user_install: no
+
+    - name: Create custom MOTD script
+      copy:
+        dest: /etc/update-motd.d/99-custom-motd
+        content: |
+          #!/bin/bash
+          figlet -f 3d "drego" -t | lolcat
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Remove static MOTD file (if exists)
+      file:
+        path: /etc/motd
+        state: absent
+
+    - name: Ensure MOTD scripts are executable
+      file:
+        path: /etc/update-motd.d/99-custom-motd
+        mode: '0755'

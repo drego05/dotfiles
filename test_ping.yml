@@ -1,0 +1,7 @@
+---
+- name: Simple ping test
+  hosts: lxc_hosts
+  gather_facts: no
+  tasks:
+    - name: Ping test
+      ansible.builtin.ping:

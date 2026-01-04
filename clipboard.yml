@@ -1,0 +1,27 @@
+---
+- name: Setup clipboard utilities
+  hosts: all
+  become: true  # for sudo
+  tasks:
+    - name: Install xsel
+      apt:
+        name: xsel
+        state: present
+
+    - name: Add clipboard aliases to zshrc
+      blockinfile:
+        path: ~/.zshrc
+        block: |
+          alias pbcopy='xsel --input --clipboard'
+          alias pbpaste='xsel --output --clipboard'
+        marker: "# {mark} CLIPBOARD ALIASES"
+
+    - name: Source zshrc
+      shell: source ~/.zshrc
+      args:
+        executable: /bin/zsh
+
+    - name: Test clipboard functionality
+      shell: |
+        echo "Hello World" | xsel --input --clipboard
+        xsel --output --clipboard > file.txt

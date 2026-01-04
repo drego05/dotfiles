@@ -1,0 +1,7 @@
+- name: Reboot remote host
+  hosts: all
+  become: yes  # Use if you need elevated privileges
+  tasks:
+    - name: Reboot the system
+      ansible.builtin.reboot:
+        reboot_timeout: 300

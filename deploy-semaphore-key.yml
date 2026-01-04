@@ -1,0 +1,23 @@
+---
+- name: Deploy Semaphore SSH Key to All Homelab Hosts
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Ensure .ssh directory exists
+      file:
+        path: ~/.ssh
+        state: directory
+        mode: "0700"
+
+    - name: Deploy semaphore-homelab public key
+      authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ lookup('file', '~/.ssh/semaphore-homelab.pub') }}"
+        comment: "semaphore-ansible-automation"
+      register: key_deployment
+
+    - name: Show deployment status
+      debug:
+        msg: "Key deployed successfully to {{ inventory_hostname }}"
+      when: key_deployment.changed
