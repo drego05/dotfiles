@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Dotfiles Bootstrap Script
-# This script sets up a complete Zsh environment with Oh My Zsh, Spaceship, eza, and custom configs
+# This script sets up a complete Zsh environment with Oh My Zsh, Starship, eza, and custom configs
 # Works on: Linux, WSL, and macOS
 
 set -e  # Exit on error
@@ -97,14 +97,59 @@ else
     print_success "Oh My Zsh already installed"
 fi
 
-# Install Spaceship Prompt
-if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/spaceship-prompt" ]; then
-    print_status "Installing Spaceship Prompt..."
-    git clone https://github.com/spaceship-prompt/spaceship-prompt.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/spaceship-prompt" --depth=1
-    ln -sf "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/spaceship-prompt/spaceship.zsh-theme" "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/spaceship.zsh-theme"
-    print_success "Spaceship Prompt installed"
+# Install Starship Prompt
+if ! command -v starship &> /dev/null; then
+    print_status "Installing Starship Prompt..."
+    mkdir -p "$HOME/.local/bin"
+    curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir "$HOME/.local/bin" -y
+
+    # Ensure .local/bin is in PATH
+    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+    print_success "Starship Prompt installed"
 else
-    print_success "Spaceship Prompt already installed"
+    print_success "Starship already installed ($(starship --version))"
+fi
+
+# Create Starship config if it doesn't exist
+STARSHIP_CONFIG="$HOME/.config/starship.toml"
+if [ ! -f "$STARSHIP_CONFIG" ]; then
+    print_status "Creating default Starship configuration..."
+    mkdir -p "$HOME/.config"
+    cat > "$STARSHIP_CONFIG" << 'STARSHIP_EOF'
+# Starship Configuration
+# See https://starship.rs/config/
+
+format = """
+[┌──](#9ece6a)$os$username$hostname$directory$git_branch$git_status
+[└─>](#9ece6a) """
+
+add_newline = true
+
+[os]
+disabled = false
+
+[username]
+show_always = true
+format = "[$user]($style)@"
+
+[hostname]
+ssh_only = false
+format = "[$hostname]($style) "
+
+[directory]
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+
+[git_status]
+format = '([\[$all_status$ahead_behind\]]($style) )'
+STARSHIP_EOF
+    print_success "Starship config created"
+else
+    print_success "Starship config already exists"
 fi
 
 # Install zsh-autosuggestions plugin
@@ -171,7 +216,7 @@ mkdir -p "$FONT_DIR"
 if [ ! -f "$FONT_DIR/MesloLGSNerdFont-Regular.ttf" ]; then
     print_status "Downloading MesloLGS Nerd Font..."
 
-    # Download Meslo Nerd Font (recommended for Spaceship)
+    # Download Meslo Nerd Font (recommended for Starship)
     cd /tmp
     curl -fLo "MesloLGS.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/Meslo.zip
     unzip -o MesloLGS.zip -d "$FONT_DIR" "*.ttf"
@@ -187,14 +232,14 @@ if [ ! -f "$FONT_DIR/MesloLGSNerdFont-Regular.ttf" ]; then
 
     if [[ "$OS" == "wsl" ]]; then
         print_status "WSL detected - You need to configure your terminal font manually"
-        echo "           Set your terminal font to: 'MesloLGS Nerd Font'"
+        echo "           Set your terminal font to a Nerd Font (e.g., 'MesloLGS Nerd Font')"
         echo "           In Windows Terminal: Settings > Profiles > Defaults > Appearance > Font face"
     elif [[ "$OS" == "mac" ]]; then
-        print_status "macOS detected - Configure your terminal to use 'MesloLGS Nerd Font'"
+        print_status "macOS detected - Configure your terminal to use a Nerd Font"
         echo "           In iTerm2: Preferences > Profiles > Text > Font"
         echo "           In Terminal.app: Preferences > Profiles > Text > Font"
     else
-        print_status "Configure your terminal emulator to use 'MesloLGS Nerd Font'"
+        print_status "Configure your terminal emulator to use a Nerd Font for best results"
     fi
 else
     print_success "Nerd Fonts already installed"
@@ -247,8 +292,9 @@ echo -e "${GREEN}  Installation Complete!${NC}"
 echo -e "${GREEN}===================================${NC}"
 echo ""
 echo "Next steps:"
-echo "  1. Configure your terminal to use 'MesloLGS Nerd Font' for proper icons"
+echo "  1. Configure your terminal to use a Nerd Font (e.g., 'MesloLGS Nerd Font') for proper icons"
 echo "  2. Restart your terminal or run: exec zsh"
 echo "  3. Your old dotfiles are backed up with .backup extension"
 echo "  4. Customize your aliases in ~/.zsh_aliases"
+echo "  5. Customize Starship prompt in ~/.config/starship.toml"
 echo ""
