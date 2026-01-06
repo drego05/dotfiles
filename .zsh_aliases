@@ -1,2 +1,12 @@
 alias ls="eza --long --icons"
 alias reload="source ~/.zshrc"
+
+# Ansible aliases (only if ansible is installed)
+if [ -f ~/.local/bin/ansible ]; then
+    alias ansible="~/.local/bin/ansible"
+    alias ansible-playbook="~/.local/bin/ansible-playbook"
+    alias ansible-galaxy="~/.local/bin/ansible-galaxy"
+    alias ansible-vault="~/.local/bin/ansible-vault"
+    alias ansible-inventory="~/.local/bin/ansible-inventory"
+    alias ansible-config="~/.local/bin/ansible-config"
+fi
