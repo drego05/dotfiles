@@ -3,12 +3,13 @@
   hosts: all
   become: yes
   tasks:
-    - name: Install dependencies (figlet, ruby, and rubygems)
+    - name: Install dependencies (figlet, ruby, rubygems, and zsh)
       apt:
         name:
           - figlet
           - ruby
           - ruby-dev
+          - zsh
         state: present
         update_cache: yes
 
@@ -18,22 +19,33 @@
         state: present
         user_install: no
 
-    - name: Create custom MOTD script
-      copy:
-        dest: /etc/update-motd.d/99-custom-motd
-        content: |
-          #!/bin/bash
-          figlet -f 3d "drego" -t | lolcat
-        mode: '0755'
-        owner: root
-        group: root
+    - name: Remove system MOTD script (we'll use .zshrc instead)
+      file:
+        path: /etc/update-motd.d/99-custom-motd
+        state: absent
 
-    - name: Remove static MOTD file (if exists)
+    - name: Remove static MOTD file
       file:
         path: /etc/motd
         state: absent
 
-    - name: Ensure MOTD scripts are executable
-      file:
-        path: /etc/update-motd.d/99-custom-motd
-        mode: '0755'
+    - name: Change root default shell to zsh
+      user:
+        name: root
+        shell: /bin/zsh
+
+    - name: Add colorful banner to .zshrc
+      blockinfile:
+        path: /root/.zshrc
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - MOTD"
+        block: |
+          # Display custom banner on shell start
+          figlet -f 3d "drego" -t | /usr/games/lolcat
+        create: yes
+        insertafter: EOF
+
+    - name: Remove from .bashrc (we only use zsh)
+      lineinfile:
+        path: /root/.bashrc
+        line: '/etc/update-motd.d/99-custom-motd'
+        state: absent
