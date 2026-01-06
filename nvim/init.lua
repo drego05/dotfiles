@@ -75,6 +75,15 @@ require("lazy").setup({
     end,
   },
 
+  -- Formatter
+  {
+    "stevearc/conform.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+      require("plugins.conform")
+    end,
+  },
+
   -- Autocompletion
   {
     "hrsh7th/nvim-cmp",
