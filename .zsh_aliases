@@ -11,17 +11,6 @@ if [ -f ~/.local/bin/ansible ]; then
     alias ansible-config="~/.local/bin/ansible-config"
 fi
 
-<<<<<<< HEAD
-# Terraform & Deployment Navigation (using absolute paths)
-alias pb='cd /home/drego/ansible-project/playbooks'
-alias tfp='cd /home/drego/ansible-project/playbooks/terraform-proxmox'
-alias tfvm='cd /home/drego/ansible-project/playbooks/terraform-proxmox/deployments/vms'
-alias tfa='cd /home/drego/ansible-project/playbooks/terraform-proxmox/deployments/vms/archlinux'
-alias tfarco='cd /home/drego/ansible-project/playbooks/terraform-proxmox/deployments/vms/arcolinux'
-
-# Quick Terraform commands (run from anywhere)
-alias tfarch='cd /home/drego/ansible-project/playbooks/terraform-proxmox/deployments/vms/archlinux && terraform'
-=======
 # Terraform & Deployment Navigation
 alias pb='cd ~/ansible-project/playbooks'
 alias tfp='cd ~/ansible-project/playbooks/terraform-proxmox'
@@ -31,4 +20,3 @@ alias tfarco='cd ~/ansible-project/playbooks/terraform-proxmox/deployments/vms/a
 
 # Quick Terraform commands (run from anywhere)
 alias tfarch='cd ~/ansible-project/playbooks/terraform-proxmox/deployments/vms/archlinux && terraform'
->>>>>>> e7d4eb17f621efa196aa8c366681c63ce57eb784
