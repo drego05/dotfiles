@@ -10,3 +10,13 @@ if [ -f ~/.local/bin/ansible ]; then
     alias ansible-inventory="~/.local/bin/ansible-inventory"
     alias ansible-config="~/.local/bin/ansible-config"
 fi
+
+# Terraform & Deployment Navigation (using absolute paths)
+alias pb='cd /home/drego/ansible-project/playbooks'
+alias tfp='cd /home/drego/ansible-project/playbooks/terraform-proxmox'
+alias tfvm='cd /home/drego/ansible-project/playbooks/terraform-proxmox/deployments/vms'
+alias tfa='cd /home/drego/ansible-project/playbooks/terraform-proxmox/deployments/vms/archlinux'
+alias tfarco='cd /home/drego/ansible-project/playbooks/terraform-proxmox/deployments/vms/arcolinux'
+
+# Quick Terraform commands (run from anywhere)
+alias tfarch='cd /home/drego/ansible-project/playbooks/terraform-proxmox/deployments/vms/archlinux && terraform'
