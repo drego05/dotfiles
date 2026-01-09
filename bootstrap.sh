@@ -2,7 +2,7 @@
 
 # Dotfiles Bootstrap Script
 # This script sets up a complete Zsh environment with Oh My Zsh, Starship, eza, and custom configs
-# Works on: Linux, WSL, and macOS
+# Works on: Linux (Arch, Debian/Ubuntu), WSL, and macOS
 
 set -e  # Exit on error
 
@@ -33,14 +33,28 @@ print_error() {
     echo -e "${RED}✗${NC} $1"
 }
 
-# Detect OS
+# Detect OS and Package Manager
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     OS="linux"
     if grep -qi microsoft /proc/version; then
         OS="wsl"
     fi
+    
+    # Detect package manager
+    if command -v pacman &> /dev/null; then
+        PKG_MANAGER="pacman"
+        print_status "Detected package manager: pacman (Arch Linux)"
+    elif command -v apt-get &> /dev/null; then
+        PKG_MANAGER="apt"
+        print_status "Detected package manager: apt (Debian/Ubuntu)"
+    else
+        print_error "No supported package manager found (pacman or apt-get)"
+        exit 1
+    fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     OS="mac"
+    PKG_MANAGER="brew"
+    print_status "Detected package manager: brew (macOS)"
 else
     print_error "Unsupported OS: $OSTYPE"
     exit 1
@@ -48,15 +62,24 @@ fi
 
 print_status "Detected OS: $OS"
 
+# Package installation wrapper
+install_package() {
+    local package=$1
+    
+    if [[ "$PKG_MANAGER" == "pacman" ]]; then
+        sudo pacman -Sy --noconfirm $package
+    elif [[ "$PKG_MANAGER" == "apt" ]]; then
+        sudo apt-get update -qq
+        sudo apt-get install -y $package
+    elif [[ "$PKG_MANAGER" == "brew" ]]; then
+        brew install $package
+    fi
+}
+
 # Install Zsh if not already installed
 if ! command -v zsh &> /dev/null; then
     print_status "Installing Zsh..."
-    if [[ "$OS" == "linux" ]] || [[ "$OS" == "wsl" ]]; then
-        sudo apt-get update
-        sudo apt-get install -y zsh
-    elif [[ "$OS" == "mac" ]]; then
-        brew install zsh
-    fi
+    install_package zsh
     print_success "Zsh installed"
 else
     print_success "Zsh already installed"
@@ -65,11 +88,7 @@ fi
 # Install tmux if not already installed
 if ! command -v tmux &> /dev/null; then
     print_status "Installing tmux..."
-    if [[ "$OS" == "linux" ]] || [[ "$OS" == "wsl" ]]; then
-        sudo apt-get install -y tmux
-    elif [[ "$OS" == "mac" ]]; then
-        brew install tmux
-    fi
+    install_package tmux
     print_success "tmux installed"
 else
     print_success "tmux already installed"
@@ -78,10 +97,12 @@ fi
 # Install Neovim if not already installed
 if ! command -v nvim &> /dev/null; then
     print_status "Installing Neovim..."
-    if [[ "$OS" == "linux" ]] || [[ "$OS" == "wsl" ]]; then
-        sudo apt-get install -y neovim
-    elif [[ "$OS" == "mac" ]]; then
-        brew install neovim
+    if [[ "$PKG_MANAGER" == "pacman" ]]; then
+        install_package neovim
+    elif [[ "$PKG_MANAGER" == "apt" ]]; then
+        install_package neovim
+    elif [[ "$PKG_MANAGER" == "brew" ]]; then
+        install_package neovim
     fi
     print_success "Neovim installed"
 else
@@ -173,15 +194,17 @@ fi
 # Install eza (modern ls replacement)
 if ! command -v eza &> /dev/null; then
     print_status "Installing eza..."
-    if [[ "$OS" == "linux" ]] || [[ "$OS" == "wsl" ]]; then
-        # Install eza on Linux/WSL
+    if [[ "$PKG_MANAGER" == "pacman" ]]; then
+        install_package eza
+    elif [[ "$PKG_MANAGER" == "apt" ]]; then
+        # Install eza on Debian/Ubuntu
         sudo mkdir -p /etc/apt/keyrings
         wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
         echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
         sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
         sudo apt-get update
         sudo apt-get install -y eza
-    elif [[ "$OS" == "mac" ]]; then
+    elif [[ "$PKG_MANAGER" == "brew" ]]; then
         brew install eza
     fi
     print_success "eza installed"
@@ -192,15 +215,17 @@ fi
 # Install GitHub CLI (gh)
 if ! command -v gh &> /dev/null; then
     print_status "Installing GitHub CLI..."
-    if [[ "$OS" == "linux" ]] || [[ "$OS" == "wsl" ]]; then
-        # Install GitHub CLI on Linux/WSL
+    if [[ "$PKG_MANAGER" == "pacman" ]]; then
+        install_package github-cli
+    elif [[ "$PKG_MANAGER" == "apt" ]]; then
+        # Install GitHub CLI on Debian/Ubuntu
         sudo mkdir -p -m 755 /etc/apt/keyrings
         wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null
         sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
         sudo apt-get update
         sudo apt-get install -y gh
-    elif [[ "$OS" == "mac" ]]; then
+    elif [[ "$PKG_MANAGER" == "brew" ]]; then
         brew install gh
     fi
     print_success "GitHub CLI installed"
@@ -215,6 +240,12 @@ mkdir -p "$FONT_DIR"
 
 if [ ! -f "$FONT_DIR/MesloLGSNerdFont-Regular.ttf" ]; then
     print_status "Downloading MesloLGS Nerd Font..."
+
+    # Install unzip if needed
+    if ! command -v unzip &> /dev/null; then
+        print_status "Installing unzip..."
+        install_package unzip
+    fi
 
     # Download Meslo Nerd Font (recommended for Starship)
     cd /tmp
