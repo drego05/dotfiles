@@ -154,3 +154,30 @@ fi
 if command -v starship &> /dev/null; then
     eval "$(starship init zsh)"
 fi
+
+# Cursor settings - ensure visible blinking cursor
+# Set cursor to blinking block
+echo -ne "\e[1 q"
+
+# Set cursor for different vi modes (if using vi mode)
+function zle-keymap-select {
+  if [[ ${KEYMAP} == vicmd ]] || [[ $1 = "block" ]]; then
+    echo -ne "\e[2 q"  # Steady block cursor
+  elif [[ ${KEYMAP} == main ]] || [[ ${KEYMAP} == viins ]] || [[ ${KEYMAP} = "" ]] || [[ $1 = "beam" ]]; then
+    echo -ne "\e[5 q"  # Blinking beam cursor
+  fi
+}
+zle -N zle-keymap-select
+
+# Initialize cursor on shell start
+function zle-line-init {
+  echo -ne "\e[5 q"  # Blinking beam cursor
+}
+zle -N zle-line-init
+
+# Reset cursor when shell exits
+function reset_cursor() {
+  echo -ne "\e[5 q"
+}
+trap reset_cursor EXIT
+
