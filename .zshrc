@@ -181,3 +181,10 @@ function reset_cursor() {
 }
 trap reset_cursor EXIT
 
+# ============================================
+# Local Configuration (not version controlled)
+# ============================================
+# Load local secrets and machine-specific settings
+if [ -f ~/.zshrc.local ]; then
+    source ~/.zshrc.local
+fi

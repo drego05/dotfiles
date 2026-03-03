@@ -14,7 +14,7 @@ Personal configuration files for tmux and neovim.
 Clone this repository and run the install script:
 
 ```bash
-git clone http://192.168.1.248:3000/drego/dotfiles.git ~/dotfiles
+git clone https://github.com/drego05/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./install.sh
 ```

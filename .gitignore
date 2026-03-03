@@ -10,3 +10,7 @@ nvim/.netrwhist
 *.swo
 *~
 .backup/
+
+# Local secrets (not version controlled)
+.zshrc.local
+.zshrc.backup_with_secrets
