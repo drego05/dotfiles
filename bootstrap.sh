@@ -33,6 +33,20 @@ print_error() {
     echo -e "${RED}✗${NC} $1"
 }
 
+# Smart sudo wrapper - only use sudo if needed and available
+run_elevated() {
+    if [ "$EUID" -eq 0 ]; then
+        # Already running as root, no sudo needed
+        "$@"
+    elif command -v sudo &> /dev/null; then
+        # Not root, but sudo is available
+        sudo "$@"
+    else
+        # Not root and no sudo (like in some containers), try running directly
+        "$@"
+    fi
+}
+
 # Detect OS and Package Manager
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     OS="linux"
@@ -65,12 +79,12 @@ print_status "Detected OS: $OS"
 # Package installation wrapper
 install_package() {
     local package=$1
-    
+
     if [[ "$PKG_MANAGER" == "pacman" ]]; then
-        sudo pacman -Sy --noconfirm $package
+        run_elevated pacman -Sy --noconfirm $package
     elif [[ "$PKG_MANAGER" == "apt" ]]; then
-        sudo apt-get update -qq
-        sudo apt-get install -y $package
+        run_elevated apt-get update -qq
+        run_elevated apt-get install -y $package
     elif [[ "$PKG_MANAGER" == "brew" ]]; then
         brew install $package
     fi
@@ -198,12 +212,12 @@ if ! command -v eza &> /dev/null; then
         install_package eza
     elif [[ "$PKG_MANAGER" == "apt" ]]; then
         # Install eza on Debian/Ubuntu
-        sudo mkdir -p /etc/apt/keyrings
-        wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
-        echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
-        sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
-        sudo apt-get update
-        sudo apt-get install -y eza
+        run_elevated mkdir -p /etc/apt/keyrings
+        wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | run_elevated gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | run_elevated tee /etc/apt/sources.list.d/gierens.list
+        run_elevated chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+        run_elevated apt-get update
+        run_elevated apt-get install -y eza
     elif [[ "$PKG_MANAGER" == "brew" ]]; then
         brew install eza
     fi
@@ -219,12 +233,12 @@ if ! command -v gh &> /dev/null; then
         install_package github-cli
     elif [[ "$PKG_MANAGER" == "apt" ]]; then
         # Install GitHub CLI on Debian/Ubuntu
-        sudo mkdir -p -m 755 /etc/apt/keyrings
-        wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null
-        sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-        sudo apt-get update
-        sudo apt-get install -y gh
+        run_elevated mkdir -p -m 755 /etc/apt/keyrings
+        wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | run_elevated tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null
+        run_elevated chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | run_elevated tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+        run_elevated apt-get update
+        run_elevated apt-get install -y gh
     elif [[ "$PKG_MANAGER" == "brew" ]]; then
         brew install gh
     fi
