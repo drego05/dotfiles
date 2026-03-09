@@ -247,6 +247,21 @@ else
     print_success "GitHub CLI already installed"
 fi
 
+# Install fzf (fuzzy finder)
+if ! command -v fzf &> /dev/null; then
+    print_status "Installing fzf..."
+    if [[ "$PKG_MANAGER" == "pacman" ]]; then
+        install_package fzf
+    elif [[ "$PKG_MANAGER" == "apt" ]]; then
+        install_package fzf
+    elif [[ "$PKG_MANAGER" == "brew" ]]; then
+        brew install fzf
+    fi
+    print_success "fzf installed"
+else
+    print_success "fzf already installed"
+fi
+
 # Install Nerd Fonts
 print_status "Installing Nerd Fonts for proper icon display..."
 FONT_DIR="$HOME/.local/share/fonts"
