@@ -283,6 +283,15 @@ else
     print_success "GitHub CLI already installed"
 fi
 
+# Install yamllint (used by nvim-lint for YAML diagnostics)
+if ! command -v yamllint &> /dev/null; then
+    print_status "Installing yamllint..."
+    install_package yamllint
+    print_success "yamllint installed"
+else
+    print_success "yamllint already installed"
+fi
+
 # Install fzf (fuzzy finder)
 if ! command -v fzf &> /dev/null; then
     print_status "Installing fzf..."
