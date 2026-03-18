@@ -29,6 +29,7 @@ mason_lspconfig.setup({
     "jsonls",
     "yamlls",
   },
+  automatic_enable = false,
 })
 
 -- LSP keymaps (attached when LSP connects to buffer)
