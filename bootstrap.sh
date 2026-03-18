@@ -205,6 +205,15 @@ else
     print_success "zsh-syntax-highlighting already installed"
 fi
 
+# Install GPG (required for apt keyrings used by eza and gh installs)
+if ! command -v gpg &> /dev/null; then
+    print_status "Installing GPG..."
+    install_package gnupg
+    print_success "GPG installed"
+else
+    print_success "GPG already installed"
+fi
+
 # Install eza (modern ls replacement)
 if ! command -v eza &> /dev/null; then
     print_status "Installing eza..."
@@ -335,7 +344,19 @@ backup_file ".tmux.conf"
 
 create_symlink "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
 create_symlink "$DOTFILES_DIR/.zsh_aliases" "$HOME/.zsh_aliases"
-create_symlink "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
+create_symlink "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
+
+# Symlink neovim config (lazy.nvim will auto-bootstrap on first nvim launch)
+print_status "Creating symlink for neovim config..."
+mkdir -p "$HOME/.config"
+if [ -L "$HOME/.config/nvim" ]; then
+    rm "$HOME/.config/nvim"
+elif [ -d "$HOME/.config/nvim" ]; then
+    print_status "Backing up existing nvim config..."
+    mv "$HOME/.config/nvim" "$HOME/.config/nvim.backup"
+fi
+ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
+print_success "Symlinked nvim config -> $DOTFILES_DIR/nvim (Lazy will install plugins on first launch)"
 
 # Change default shell to Zsh
 if [ "$SHELL" != "$(which zsh)" ]; then
