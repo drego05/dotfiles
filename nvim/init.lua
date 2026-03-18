@@ -84,6 +84,15 @@ require("lazy").setup({
     end,
   },
 
+  -- Linter
+  {
+    "mfussenegger/nvim-lint",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+      require("plugins.lint")
+    end,
+  },
+
   -- Autocompletion
   {
     "hrsh7th/nvim-cmp",

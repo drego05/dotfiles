@@ -32,6 +32,19 @@ mason_lspconfig.setup({
   automatic_enable = false,
 })
 
+-- Install linters via Mason
+local mason_ok2, mason_registry = pcall(require, "mason-registry")
+if mason_ok2 then
+  mason_registry.refresh(function()
+    for _, tool in ipairs({ "yamllint" }) do
+      local pkg = mason_registry.get_package(tool)
+      if not pkg:is_installed() then
+        pkg:install()
+      end
+    end
+  end)
+end
+
 -- LSP keymaps (attached when LSP connects to buffer)
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
