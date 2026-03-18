@@ -108,19 +108,46 @@ else
     print_success "tmux already installed"
 fi
 
-# Install Neovim if not already installed
+# Install Neovim (0.11+ required for plugins)
+# apt repos lag far behind — install from GitHub releases on Linux
+NVIM_MIN_VERSION="0.11"
+install_neovim_from_github() {
+    print_status "Downloading Neovim stable from GitHub releases..."
+    local tmp_dir=$(mktemp -d)
+    if [[ "$OS" == "mac" ]]; then
+        curl -fLo "$tmp_dir/nvim.tar.gz" https://github.com/neovim/neovim/releases/download/stable/nvim-macos-x86_64.tar.gz
+        tar -xzf "$tmp_dir/nvim.tar.gz" -C "$tmp_dir"
+        run_elevated cp -r "$tmp_dir/nvim-macos-x86_64/"* /usr/local/
+    else
+        curl -fLo "$tmp_dir/nvim.tar.gz" https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.tar.gz
+        tar -xzf "$tmp_dir/nvim.tar.gz" -C /opt/
+        run_elevated ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+    fi
+    rm -rf "$tmp_dir"
+    print_success "Neovim installed ($(nvim --version | head -1))"
+}
+
+NVIM_NEEDS_INSTALL=false
 if ! command -v nvim &> /dev/null; then
-    print_status "Installing Neovim..."
+    NVIM_NEEDS_INSTALL=true
+else
+    # Check version is new enough
+    NVIM_CURRENT=$(nvim --version | head -1 | grep -oP '\d+\.\d+' | head -1)
+    if [[ "$(printf '%s\n' "$NVIM_MIN_VERSION" "$NVIM_CURRENT" | sort -V | head -1)" != "$NVIM_MIN_VERSION" ]]; then
+        print_status "Neovim $NVIM_CURRENT is too old (need $NVIM_MIN_VERSION+), upgrading..."
+        NVIM_NEEDS_INSTALL=true
+    else
+        print_success "Neovim already installed ($(nvim --version | head -1))"
+    fi
+fi
+
+if [[ "$NVIM_NEEDS_INSTALL" == true ]]; then
     if [[ "$PKG_MANAGER" == "pacman" ]]; then
         install_package neovim
-    elif [[ "$PKG_MANAGER" == "apt" ]]; then
-        install_package neovim
-    elif [[ "$PKG_MANAGER" == "brew" ]]; then
-        install_package neovim
+        print_success "Neovim installed"
+    else
+        install_neovim_from_github
     fi
-    print_success "Neovim installed"
-else
-    print_success "Neovim already installed"
 fi
 
 # Install Oh My Zsh if not already installed

@@ -29,37 +29,32 @@ mason_lspconfig.setup({
     "jsonls",
     "yamlls",
   },
-  automatic_installation = true,
 })
 
--- LSP keymaps (attached to buffers with LSP)
-local on_attach = function(client, bufnr)
-  local opts = { noremap = true, silent = true, buffer = bufnr }
+-- LSP keymaps (attached when LSP connects to buffer)
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local opts = { noremap = true, silent = true, buffer = args.buf }
 
-  vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-  vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-  vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-  vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-  vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-  vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-  vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-  vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts)
-  vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
-  vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
-end
+    vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+    vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+    vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+    vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+    vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts)
+    vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+    vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+  end,
+})
 
--- Setup language servers
-local lspconfig_ok, lspconfig = pcall(require, "lspconfig")
-if not lspconfig_ok then
-  return
-end
-
+-- Capabilities from cmp_nvim_lsp
 local cmp_ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
 local capabilities = cmp_ok and cmp_nvim_lsp.default_capabilities() or vim.lsp.protocol.make_client_capabilities()
 
--- Lua
-lspconfig.lua_ls.setup({
-  on_attach = on_attach,
+-- nvim 0.11+: configure servers via vim.lsp.config / vim.lsp.enable
+vim.lsp.config("lua_ls", {
   capabilities = capabilities,
   settings = {
     Lua = {
@@ -77,29 +72,12 @@ lspconfig.lua_ls.setup({
   },
 })
 
--- Python
-lspconfig.pyright.setup({
-  on_attach = on_attach,
-  capabilities = capabilities,
-})
+vim.lsp.config("pyright", { capabilities = capabilities })
+vim.lsp.config("bashls", { capabilities = capabilities })
+vim.lsp.config("jsonls", { capabilities = capabilities })
+vim.lsp.config("yamlls", { capabilities = capabilities })
 
--- Bash
-lspconfig.bashls.setup({
-  on_attach = on_attach,
-  capabilities = capabilities,
-})
-
--- JSON
-lspconfig.jsonls.setup({
-  on_attach = on_attach,
-  capabilities = capabilities,
-})
-
--- YAML
-lspconfig.yamlls.setup({
-  on_attach = on_attach,
-  capabilities = capabilities,
-})
+vim.lsp.enable({ "lua_ls", "pyright", "bashls", "jsonls", "yamlls" })
 
 -- Diagnostic signs
 local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
