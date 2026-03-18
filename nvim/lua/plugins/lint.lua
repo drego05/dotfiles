@@ -1,3 +1,6 @@
+-- Ensure Mason-installed binaries are in PATH
+vim.env.PATH = vim.fn.stdpath("data") .. "/mason/bin:" .. vim.env.PATH
+
 local lint_ok, lint = pcall(require, "lint")
 if not lint_ok then
   return
