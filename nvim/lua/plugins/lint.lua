@@ -4,7 +4,9 @@ if not lint_ok then
 end
 
 lint.linters_by_ft = {
-  yaml = { "yamllint" },
+  yaml     = { "yamllint" },
+  json     = { "jsonlint" },
+  markdown = { "markdownlint" },
 }
 
 -- Run linter on save and when entering a buffer
