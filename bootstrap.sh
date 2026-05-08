@@ -53,16 +53,19 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if grep -qi microsoft /proc/version; then
         OS="wsl"
     fi
-    
-    # Detect package manager
-    if command -v pacman &> /dev/null; then
+
+    # Prefer Homebrew on Linux when available (common in containers/dev envs)
+    if command -v brew &> /dev/null; then
+        PKG_MANAGER="brew"
+        print_status "Detected package manager: brew (Linux/Homebrew)"
+    elif command -v pacman &> /dev/null; then
         PKG_MANAGER="pacman"
         print_status "Detected package manager: pacman (Arch Linux)"
     elif command -v apt-get &> /dev/null; then
         PKG_MANAGER="apt"
         print_status "Detected package manager: apt (Debian/Ubuntu)"
     else
-        print_error "No supported package manager found (pacman or apt-get)"
+        print_error "No supported package manager found (brew, pacman, or apt-get)"
         exit 1
     fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -79,14 +82,15 @@ print_status "Detected OS: $OS"
 # Package installation wrapper
 install_package() {
     local package=$1
+    local brew_package="${2:-$1}"
 
     if [[ "$PKG_MANAGER" == "pacman" ]]; then
-        run_elevated pacman -Sy --noconfirm $package
+        run_elevated pacman -Sy --noconfirm "$package"
     elif [[ "$PKG_MANAGER" == "apt" ]]; then
         run_elevated apt-get update -qq
-        run_elevated apt-get install -y $package
+        run_elevated apt-get install -y "$package"
     elif [[ "$PKG_MANAGER" == "brew" ]]; then
-        brew install $package
+        brew install "$brew_package"
     fi
 }
 
