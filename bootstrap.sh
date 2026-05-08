@@ -54,18 +54,18 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         OS="wsl"
     fi
 
-    # Prefer Homebrew on Linux when available (common in containers/dev envs)
-    if command -v brew &> /dev/null; then
-        PKG_MANAGER="brew"
-        print_status "Detected package manager: brew (Linux/Homebrew)"
-    elif command -v pacman &> /dev/null; then
+    # Use native package managers first; fall back to brew if needed
+    if command -v pacman &> /dev/null; then
         PKG_MANAGER="pacman"
         print_status "Detected package manager: pacman (Arch Linux)"
     elif command -v apt-get &> /dev/null; then
         PKG_MANAGER="apt"
         print_status "Detected package manager: apt (Debian/Ubuntu)"
+    elif command -v brew &> /dev/null; then
+        PKG_MANAGER="brew"
+        print_status "Detected package manager: brew (Linux/Homebrew fallback)"
     else
-        print_error "No supported package manager found (brew, pacman, or apt-get)"
+        print_error "No supported package manager found (pacman, apt-get, or brew)"
         exit 1
     fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
