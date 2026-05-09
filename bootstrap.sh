@@ -97,8 +97,11 @@ install_package() {
 # Install Zsh if not already installed
 if ! command -v zsh &> /dev/null; then
     print_status "Installing Zsh..."
-    install_package zsh
-    print_success "Zsh installed"
+    if install_package zsh; then
+        print_success "Zsh installed"
+    else
+        print_error "Zsh install failed; continuing bootstrap without it"
+    fi
 else
     print_success "Zsh already installed"
 fi
